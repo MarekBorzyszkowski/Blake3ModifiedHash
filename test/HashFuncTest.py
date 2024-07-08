@@ -67,7 +67,7 @@ class MyTestCase(unittest.TestCase):
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
 
-    def test_blake3_hash_3(self):
+    def test_blake3_hash_4(self):
         message = 'a'*48479
         expected = np.array([np.uint16(0x3705), np.uint16(0xB383), np.uint16(0xC5F6), np.uint16(0x199B),
                              np.uint16(0x874D), np.uint16(0xD66A), np.uint16(0x8BB0), np.uint16(0xE749)])
