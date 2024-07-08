@@ -1,7 +1,5 @@
-import re
-
-import numpy as np
 import numba as nb
+import numpy as np
 from numba import jit
 
 from src.Permutations import G_function, permute_m_by_s
@@ -74,11 +72,8 @@ def fill_blocks(block):
     return block
 
 
-# @jit(nopython=True)
-def blake3_hash(message):
-    if len(message) is None:
-        message = ''
-    block_of_bytes = np.array([np.uint16(ord(character)) for character in message], dtype=np.uint16)
+@jit(nb.uint16[:](nb.uint16[:]), nopython=True)
+def blake3_hash(block_of_bytes):
     block_of_bytes = fill_blocks(block_of_bytes)
     block_of_words = merge_bytes(block_of_bytes)
     w = np.array([np.uint16(0) for _ in range(8)])
@@ -86,3 +81,7 @@ def blake3_hash(message):
     for i in range(number_of_blocks):
         w = hash_block(w, block_of_words[16*i:16*i+16], i)
     return w
+
+
+def message_to_binary(message):
+    return np.array([np.uint16(ord(character)) for character in message], dtype=np.uint16)

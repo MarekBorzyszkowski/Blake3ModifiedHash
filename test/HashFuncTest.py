@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.HashFunc import vertical_permutation, diagonal_permutation, hash_block, blake3_hash
+from src.HashFunc import vertical_permutation, diagonal_permutation, hash_block, blake3_hash, message_to_binary
 
 
 class MyTestCase(unittest.TestCase):
@@ -43,11 +43,11 @@ class MyTestCase(unittest.TestCase):
         for i in range(len(result)):
             self.assertEqual(expected[i], result[i])  # add assertion here
 
-    def test_blake3_hash_empty(self):
+    def test_blake3_hash_1(self):
         message = ''
         expected = np.array([np.uint16(0x898F), np.uint16(0xE038), np.uint16(0xCC44), np.uint16(0xAC95),
                              np.uint16(0x0F78), np.uint16(0xF84D), np.uint16(0x8796), np.uint16(0x98C9)])
-        result = blake3_hash(message)
+        result = blake3_hash(message_to_binary(message))
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
 
@@ -55,7 +55,7 @@ class MyTestCase(unittest.TestCase):
         message = 'AbCxYz'
         expected = np.array([np.uint16(0xE1C1), np.uint16(0x3F52), np.uint16(0x3C78), np.uint16(0x7589),
                              np.uint16(0x22FD), np.uint16(0x11AA), np.uint16(0x3132), np.uint16(0xD01C)])
-        result = blake3_hash(message)
+        result = blake3_hash(message_to_binary(message))
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
 
@@ -63,15 +63,57 @@ class MyTestCase(unittest.TestCase):
         message = '1234567890'
         expected = np.array([np.uint16(0x8691), np.uint16(0x1F68), np.uint16(0xBF45), np.uint16(0xA5D6),
                              np.uint16(0xC295), np.uint16(0xB6F7), np.uint16(0x95D9), np.uint16(0xB9BE)])
-        result = blake3_hash(message)
+        result = blake3_hash(message_to_binary(message))
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
 
     def test_blake3_hash_4(self):
+        message = 'Ala ma kota, kot ma ale.'
+        expected = np.array([np.uint16(0xB0E3), np.uint16(0x5AD8), np.uint16(0xBCC3), np.uint16(0x0D12),
+                             np.uint16(0x2FED), np.uint16(0xA609), np.uint16(0xDE3C), np.uint16(0x991C)])
+        result = blake3_hash(message_to_binary(message))
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], result[i])
+
+    def test_blake3_hash_5(self):
+        message = 'Ty, ktory wchodzisz, zegnaj sie z nadzieja.'
+        expected = np.array([np.uint16(0x862B), np.uint16(0xEA4A), np.uint16(0x8377), np.uint16(0xCB1C),
+                             np.uint16(0x7CF2), np.uint16(0x1851), np.uint16(0xF729), np.uint16(0xD593)])
+        result = blake3_hash(message_to_binary(message))
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], result[i])
+
+    def test_blake3_hash_6(self):
+        message = 'Litwo, Ojczyzno moja! ty jestes jak zdrowie;'
+        #
+        expected = np.array([np.uint16(0x94FE), np.uint16(0x5359), np.uint16(0x63CD), np.uint16(0x4055),
+                             np.uint16(0xAA16), np.uint16(0x2206), np.uint16(0x5A34), np.uint16(0x55A5)])
+        result = blake3_hash(message_to_binary(message))
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], result[i])
+
+    def test_blake3_hash_7(self):
+        message = 'a'*48000
+        expected = np.array([np.uint16(0x738C), np.uint16(0x652D), np.uint16(0x7274), np.uint16(0xEFC3),
+                             np.uint16(0xB8F4), np.uint16(0x804C), np.uint16(0xDC2D), np.uint16(0x2873)])
+        result = blake3_hash(message_to_binary(message))
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], result[i])
+
+    def test_blake3_hash_8(self):
         message = 'a'*48479
         expected = np.array([np.uint16(0x3705), np.uint16(0xB383), np.uint16(0xC5F6), np.uint16(0x199B),
                              np.uint16(0x874D), np.uint16(0xD66A), np.uint16(0x8BB0), np.uint16(0xE749)])
-        result = blake3_hash(message)
+        result = blake3_hash(message_to_binary(message))
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], result[i])
+
+    def test_blake3_hash_9(self):
+        message = 'a'*48958
+        #
+        expected = np.array([np.uint16(0xDB87), np.uint16(0xB2C0), np.uint16(0xC169), np.uint16(0xA785),
+                             np.uint16(0x96E3), np.uint16(0x2814), np.uint16(0x5B46), np.uint16(0xBFAC)])
+        result = blake3_hash(message_to_binary(message))
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
 
