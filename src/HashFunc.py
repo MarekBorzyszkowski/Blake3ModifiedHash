@@ -2,7 +2,7 @@ import numba as nb
 import numpy as np
 from numba import jit
 
-from src.Permutations import G_function, permute_m_by_s
+from Permutations import G_function, permute_m_by_s
 
 
 @jit(nb.uint16[:](nb.uint16[:], nb.uint16[:]), nopython=True)
