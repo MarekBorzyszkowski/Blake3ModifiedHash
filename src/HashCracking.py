@@ -28,8 +28,8 @@ def crack_hash(entry_message_length, expected_hash):
             combinations.append(np.array([a, b], dtype=np.uint16))
     for i in prange(len(combinations)):
         equal = compare_hash(expected_hash, blake3_hash(combinations[i]))
-        result[0] += equal * combinations[i][0]
-        result[1] += equal * combinations[i][1]
+        for j in range(entry_message_length):
+            result[j] += equal * combinations[i][j]
     return result[0], result[1]
 
 
