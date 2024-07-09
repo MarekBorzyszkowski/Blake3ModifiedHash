@@ -1,9 +1,8 @@
-import itertools
-
-import numpy as np
 import numba as nb
-from src.HashFunc import blake3_hash
+import numpy as np
 from numba import jit, prange
+
+from src.HashFunc import blake3_hash
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
 allowed_val_to_letters = {np.uint16(ord(character)): character for character in allowed_letters}
