@@ -59,7 +59,7 @@ cracking_presets = {
     8: np.array([np.uint16(0x6207), np.uint16(0x2580), np.uint16(0x374C), np.uint16(0x71E6),
                  np.uint16(0x0D2C), np.uint16(0x835E), np.uint16(0x3398), np.uint16(0x5BE5)], dtype=np.uint16),
 }
-length = 5
+length = 4
 original_combination = crack_hash(length, cracking_presets[length])
 print(original_combination)
 original_string = convert_cracked_hash_to_string(original_combination)
