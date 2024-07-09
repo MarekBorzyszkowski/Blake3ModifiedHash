@@ -1,3 +1,5 @@
+import time
+
 import numba as nb
 import numpy as np
 from numba import jit, prange
@@ -58,8 +60,13 @@ cracking_presets = {
     8: np.array([np.uint16(0x6207), np.uint16(0x2580), np.uint16(0x374C), np.uint16(0x71E6),
                  np.uint16(0x0D2C), np.uint16(0x835E), np.uint16(0x3398), np.uint16(0x5BE5)], dtype=np.uint16),
 }
-length = 4
+
+length = 3
+print(f"Start cracking for length {length}")
+start = time.perf_counter()
 original_combination = crack_hash(length, cracking_presets[length])
+finish = time.perf_counter()
+print(f"Elapsed time: {finish - start} s")
 print(original_combination)
 original_string = convert_cracked_hash_to_string(original_combination)
 print(original_string)
