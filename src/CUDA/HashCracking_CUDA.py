@@ -30,7 +30,7 @@ def compare_hash(expected_hash, actual_hash):
 
 @cuda.jit
 def crack_hash(entry_message_length, expected_hash, result):
-    combination = cuda.local.array(entry_message_length, nb.types.uint32)
+    combination = cuda.local.array(2, nb.types.uint32)
     # tid = cuda.threadIdx.x
     # bid = cuda.blockIdx.x
     # bdim = cuda.blockDim.x
