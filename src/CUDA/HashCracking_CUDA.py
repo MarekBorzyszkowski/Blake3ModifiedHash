@@ -22,7 +22,7 @@ def crack_hash_wrapper(entry_message_length):
         number_of_elements = len(allowed_val)
         for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
             get_combination(entry_message_length, i, combination)
-            equal = 0#compare_hash(expected_hash, blake3_hash(combination))
+            equal = compare_hash(expected_hash, blake3_hash(combination))
             for j in range(entry_message_length):
                 if equal == 1:
                     cuda.atomic.add(result, j, combination[j])
