@@ -30,8 +30,8 @@ def make_round(v, m):
 
 @cuda.jit(device=True)
 def hash_block(w, m, block_number, v):
-    for i in range(6):
-        make_round(v, m)
+    # for i in range(6):
+    #     make_round(v, m)
     w[0] = w[0] ^ v[0] ^ v[8]
     w[1] = w[1] ^ v[1] ^ v[9]
     w[2] = w[2] ^ v[2] ^ v[10]
