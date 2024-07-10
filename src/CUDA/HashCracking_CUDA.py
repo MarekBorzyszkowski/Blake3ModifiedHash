@@ -4,7 +4,7 @@ import numba as nb
 import numpy as np
 from numba import cuda
 
-from HashFunc_CUDA import blake3_hash, allowed_val_to_letters
+from HashFunc_CUDA import blake3_hash, allowed_val_to_letters, compare_hash, get_combination, allowed_val
 
 THREADS_PER_BLOCK = 128
 BLOCKS_PER_GRID = 16
@@ -13,19 +13,19 @@ def crack_hash_wrapper(entry_message_length):
     @cuda.jit
     def crack_hash(expected_hash, result):
         combination = cuda.local.array(entry_message_length, nb.types.uint32)
-        # tid = cuda.threadIdx.x
-        # bid = cuda.blockIdx.x
-        # bdim = cuda.blockDim.x
-        # gdim = cuda.gridDim.x
-        # beginning = (bid * bdim) + tid
-        # number_of_threads = bdim * gdim
-        # number_of_elements = len(allowed_letters)
-        # for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
-        #     get_combination(entry_message_length, i, combination)
-        #     equal = compare_hash(expected_hash, blake3_hash(combination))
-        #     for j in range(entry_message_length):
-        #         if equal == 1:
-        #             cuda.atomic.add(result, j, combination[j])
+        tid = cuda.threadIdx.x
+        bid = cuda.blockIdx.x
+        bdim = cuda.blockDim.x
+        gdim = cuda.gridDim.x
+        beginning = (bid * bdim) + tid
+        number_of_threads = bdim * gdim
+        number_of_elements = len(allowed_val)
+        for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
+            get_combination(entry_message_length, i, combination)
+            equal = 0#compare_hash(expected_hash, blake3_hash(combination))
+            for j in range(entry_message_length):
+                if equal == 1:
+                    cuda.atomic.add(result, j, combination[j])
 
     return crack_hash
 
