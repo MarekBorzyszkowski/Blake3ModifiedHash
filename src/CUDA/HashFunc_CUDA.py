@@ -2,7 +2,7 @@ import numba as nb
 import numpy as np
 from numba import jit, cuda
 
-from src.CUDA.Permutations_CUDA import G_function, permute_m_by_s
+from Permutations_CUDA import G_function, permute_m_by_s
 
 
 @cuda.jit(nb.uint32[:](nb.uint32[:], nb.uint32[:]), device=True)

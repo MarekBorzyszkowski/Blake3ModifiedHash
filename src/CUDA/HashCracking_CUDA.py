@@ -4,7 +4,7 @@ import numba as nb
 import numpy as np
 from numba import cuda
 
-from src.CUDA.HashFunc_CUDA import blake3_hash
+from HashFunc_CUDA import blake3_hash
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
 allowed_val_to_letters = {np.uint32(ord(character)): character for character in allowed_letters}
