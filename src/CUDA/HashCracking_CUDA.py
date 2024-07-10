@@ -27,6 +27,7 @@ def crack_hash_wrapper(entry_message_length):
         #         if equal == 1:
         #             cuda.atomic.add(result, j, combination[j])
 
+    return crack_hash
 
 def convert_cracked_hash_to_string(initial_combination):
     return ''.join([allowed_val_to_letters[element] for element in initial_combination])
