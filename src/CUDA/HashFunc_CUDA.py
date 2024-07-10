@@ -70,14 +70,14 @@ def fill_blocks(block):
 
 
 @cuda.jit(device=True)
-def blake3_hash(block_of_bytes):
+def blake3_hash(block_of_bytes, w):
     # block_of_bytes = fill_blocks(block_of_bytes)
     # block_of_words = merge_bytes(block_of_bytes)
-    w = np.array([np.uint32(0) for _ in range(8)])
+    for i in range(len(w)):
+        w[i] = 0
     # number_of_blocks = len(block_of_words) // 16
     # for i in range(number_of_blocks):
-    #     w = w#hash_block(w, block_of_words[16 * i:16 * i + 16], i)
-    return w
+    #     hash_block(w, block_of_words[16 * i:16 * i + 16], i)
 
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
