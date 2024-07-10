@@ -1,6 +1,6 @@
 import numba as nb
 import numpy as np
-from numba import jit, cuda
+from numba import cuda
 
 from Permutations_CUDA import G_function, permute_m_by_s
 
@@ -14,13 +14,6 @@ def vertical_permutation(v, m):
     return v
 
 
-@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
-def vertical_permutation_test(v, m):
-    results = vertical_permutation(v, m)
-    for i in range(len(v)):
-        v[i] = results[i]
-
-
 @cuda.jit(nb.uint32[:](nb.uint32[:], nb.uint32[:]), device=True)
 def diagonal_permutation(v, m):
     v[0], v[5], v[10], v[15] = G_function(v[0], v[5], v[10], v[15], m[8], m[9])
@@ -28,13 +21,6 @@ def diagonal_permutation(v, m):
     v[2], v[7], v[8], v[13] = G_function(v[2], v[7], v[8], v[13], m[12], m[13])
     v[3], v[4], v[9], v[14] = G_function(v[3], v[4], v[9], v[14], m[14], m[15])
     return v
-
-
-@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
-def diagonal_permutation_test(v, m):
-    results = diagonal_permutation(v, m)
-    for i in range(len(v)):
-        v[i] = results[i]
 
 
 @cuda.jit(nb.types.UniTuple(nb.uint32[:], 2)(nb.uint32[:], nb.uint32[:]), device=True)
@@ -58,17 +44,10 @@ def hash_block(w, m, block_number):
                     dtype=np.uint32)
 
 
-@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:], nb.uint32))
-def hash_block_test(w, m, block_number):
-    results = hash_block(w, m, block_number)
-    for i in range(len(w)):
-        w[i] = results[i]
-
-
 @cuda.jit(nb.uint32[:](nb.uint32[:]), device=True)
 def merge_bytes(block_as_bytes):
     return np.array([np.uint32((block_as_bytes[2 * i] << 8) + block_as_bytes[2 * i + 1])
-                     for i in range(len(block_as_bytes)//2)])
+                     for i in range(len(block_as_bytes) // 2)])
 
 
 @cuda.jit(nb.uint32[:](nb.uint32[:]), device=True)
@@ -98,18 +77,7 @@ def blake3_hash(block_of_bytes):
     block_of_bytes = fill_blocks(block_of_bytes)
     block_of_words = merge_bytes(block_of_bytes)
     w = np.array([np.uint32(0) for _ in range(8)])
-    number_of_blocks = len(block_of_words)//16
+    number_of_blocks = len(block_of_words) // 16
     for i in range(number_of_blocks):
-        w = hash_block(w, block_of_words[16*i:16*i+16], i)
+        w = hash_block(w, block_of_words[16 * i:16 * i + 16], i)
     return w
-
-
-@cuda.jit(nb.void(nb.uint32[:]))
-def blake3_hash_test(block_of_bytes, w):
-    results = blake3_hash(block_of_bytes)
-    for i in range(len(w)):
-        w[i] = results[i]
-
-
-def message_to_binary(message):
-    return np.array([np.uint32(ord(character)) for character in message], dtype=np.uint32)

@@ -1,10 +1,27 @@
 import unittest
 
 import numpy as np
+import numba as nb
 from numba import cuda
 
-from src.CUDA.Permutations_CUDA import rotl_test, G_function_test, permute_m_by_s_test
+from src.CUDA.Permutations_CUDA import rotl, G_function, permute_m_by_s
 
+
+@cuda.jit(nb.void(nb.uint32, nb.uint32, nb.uint32))
+def rotl_test(n, d, output):
+    output[0] = rotl(n[0], d[0])
+
+
+@cuda.jit(nb.void(nb.uint32[:]))
+def G_function_test(array):
+    array[0], array[1], array[2], array[3] = G_function(array[0], array[1], array[2], array[3], array[4], array[5])
+
+
+@cuda.jit(nb.void(nb.uint32[:]))
+def permute_m_by_s_test(m):
+    results = permute_m_by_s(m)
+    for i in range(len(m)):
+        m[i] = results[i]
 
 
 class MyTestCase(unittest.TestCase):

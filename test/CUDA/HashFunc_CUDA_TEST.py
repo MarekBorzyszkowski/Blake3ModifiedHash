@@ -1,10 +1,42 @@
 import unittest
 
 import numpy as np
+import numba as nb
 from numba import cuda
 
-from src.CUDA.HashFunc_CUDA import vertical_permutation_test, diagonal_permutation_test, hash_block_test, \
-    message_to_binary, blake3_hash_test
+from src.CUDA.HashFunc_CUDA import vertical_permutation, diagonal_permutation, hash_block, blake3_hash
+
+
+@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
+def vertical_permutation_test(v, m):
+    results = vertical_permutation(v, m)
+    for i in range(len(v)):
+        v[i] = results[i]
+
+
+@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
+def diagonal_permutation_test(v, m):
+    results = diagonal_permutation(v, m)
+    for i in range(len(v)):
+        v[i] = results[i]
+
+
+@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:], nb.uint32))
+def hash_block_test(w, m, block_number):
+    results = hash_block(w, m, block_number)
+    for i in range(len(w)):
+        w[i] = results[i]
+
+
+@cuda.jit(nb.void(nb.uint32[:]))
+def blake3_hash_test(block_of_bytes, w):
+    results = blake3_hash(block_of_bytes)
+    for i in range(len(w)):
+        w[i] = results[i]
+
+
+def message_to_binary(message):
+    return np.array([np.uint32(ord(character)) for character in message], dtype=np.uint32)
 
 
 class MyTestCase(unittest.TestCase):
@@ -128,7 +160,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(expected[i], result[i])
 
     def test_blake3_hash_7(self):
-        message = 'a'*48000
+        message = 'a' * 48000
         expected = np.array([np.uint32(0x738C), np.uint32(0x652D), np.uint32(0x7274), np.uint32(0xEFC3),
                              np.uint32(0xB8F4), np.uint32(0x804C), np.uint32(0xDC2D), np.uint32(0x2873)])
         binary = message_to_binary(message)
@@ -140,7 +172,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(expected[i], result[i])
 
     def test_blake3_hash_8(self):
-        message = 'a'*48479
+        message = 'a' * 48479
         expected = np.array([np.uint32(0x3705), np.uint32(0xB383), np.uint32(0xC5F6), np.uint32(0x199B),
                              np.uint32(0x874D), np.uint32(0xD66A), np.uint32(0x8BB0), np.uint32(0xE749)])
         binary = message_to_binary(message)
@@ -152,7 +184,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(expected[i], result[i])
 
     def test_blake3_hash_9(self):
-        message = 'a'*48958
+        message = 'a' * 48958
         expected = np.array([np.uint32(0xDB87), np.uint32(0xB2C0), np.uint32(0xC169), np.uint32(0xA785),
                              np.uint32(0x96E3), np.uint32(0x2814), np.uint32(0x5B46), np.uint32(0xBFAC)])
         binary = message_to_binary(message)

@@ -11,11 +11,6 @@ def rotl(n, d):
     return ((n << d) | (n >> SHORT_SIZE - d)) & 0xFFFF
 
 
-@cuda.jit(nb.void(nb.uint32, nb.uint32, nb.uint32))
-def rotl_test(n, d, output):
-    output[0] = rotl(n[0], d[0])
-
-
 @cuda.jit(nb.types.UniTuple(nb.uint32, 4)(nb.uint32, nb.uint32, nb.uint32, nb.uint32, nb.uint32, nb.uint32),
           device=True)
 def G_function(a, b, c, d, x, y):
@@ -30,18 +25,6 @@ def G_function(a, b, c, d, x, y):
     return a, b, c, d
 
 
-@cuda.jit(nb.void(nb.uint32[:]))
-def G_function_test(array):
-    array[0], array[1], array[2], array[3] = G_function(array[0], array[1], array[2], array[3], array[4], array[5])
-
-
 @cuda.jit(nb.uint32[:](nb.uint32[:]), device=True)
 def permute_m_by_s(m):
     return np.array([m[S_PERMUTATIONS[i]] for i in range(SHORT_SIZE)])
-
-
-@cuda.jit(nb.void(nb.uint32[:]))
-def permute_m_by_s_test(m):
-    results = permute_m_by_s(m)
-    for i in range(len(m)):
-        m[i] = results[i]
