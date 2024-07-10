@@ -1,0 +1,36 @@
+import operator
+
+import numpy as np
+import numba as nb
+from numba import jit, cuda
+
+SHORT_SIZE = 16
+S_PERMUTATIONS = np.array([5, 8, 0, 2, 6, 11, 1, 4, 15, 12, 3, 9, 10, 7, 13, 14])
+
+
+@cuda.jit(nb.uint32(nb.uint32, nb.uint32), device=True)
+def rotl(n, d):
+    return operator.iand(operator.lshift(n, d) | (operator.rshift(n,SHORT_SIZE - d)), 0xFFFF)
+
+
+@cuda.jit(nb.void(nb.uint32, nb.uint32, nb.uint32))
+def rotl_test(n, d, output):
+    output[0] = rotl(n[0], d[0])
+
+
+# @jit(nb.types.UniTuple(nb.uint32, 4)(nb.uint32, nb.uint32, nb.uint32, nb.uint32, nb.uint32, nb.uint32), nopython=True)
+# def G_function(a, b, c, d, x, y):
+#     a = (a + b + x) & 0xFFFF
+#     d = rotl((d ^ a), 3)
+#     c = (c + d) & 0xFFFF
+#     b = rotl((b ^ c), 11)
+#     a = (a + b + y) & 0xFFFF
+#     d = rotl((d ^ a), 2)
+#     c = (c + d) & 0xFFFF
+#     b = rotl((b ^ c), 5)
+#     return a, b, c, d
+#
+#
+# @jit(nb.uint32[:](nb.uint32[:]), nopython=True)
+# def permute_m_by_s(m):
+#     return np.array([m[S_PERMUTATIONS[i]] for i in range(SHORT_SIZE)])

@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.HashFunc import vertical_permutation, diagonal_permutation, hash_block, blake3_hash, message_to_binary
+from src.CPU.HashFunc import vertical_permutation, diagonal_permutation, hash_block, blake3_hash, message_to_binary
 
 
 class MyTestCase(unittest.TestCase):

@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.Permutations import rotl, G_function, permute_m_by_s
+from src.CPU.Permutations import rotl, G_function, permute_m_by_s
 
 
 class MyTestCase(unittest.TestCase):

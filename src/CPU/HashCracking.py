@@ -61,7 +61,7 @@ cracking_presets = {
                  np.uint16(0x0D2C), np.uint16(0x835E), np.uint16(0x3398), np.uint16(0x5BE5)], dtype=np.uint16),
 }
 
-length = 3
+length = 5
 print(f"Start cracking for length {length}")
 start = time.perf_counter()
 original_combination = crack_hash(length, cracking_presets[length])
