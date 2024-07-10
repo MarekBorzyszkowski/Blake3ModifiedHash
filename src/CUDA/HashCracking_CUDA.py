@@ -28,7 +28,7 @@ def compare_hash(expected_hash, actual_hash):
     return 1
 
 
-@cuda.jit('void(int32, int32[:], int32[:])')
+@cuda.jit()
 def crack_hash(entry_message_length, expected_hash, result):
     combination = cuda.local.array(2, dtype=nb.types.uint32)
     tid = cuda.threadIdx.x
