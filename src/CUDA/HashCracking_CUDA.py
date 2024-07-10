@@ -67,11 +67,17 @@ cracking_presets = {
                  np.uint32(0x0D2C), np.uint32(0x835E), np.uint32(0x3398), np.uint32(0x5BE5)], dtype=np.uint32),
 }
 
+@cuda.jit()
+def test(a, b, c):
+    c[0] = a[0] + b[0]
+
+
 length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
 start = time.perf_counter()
-crack_hash[1, 1](length, cracking_presets[length], cuda_results)
+#crack_hash[1, 1](length, cracking_presets[length], cuda_results)
+test[1,1](np.array([1], dtype=np.uint32), np.array([2], dtype=np.uint32), cuda_results)
 finish = time.perf_counter()
 results = cuda_results.copy_to_host()
 print(f"Elapsed time: {finish - start} s")
