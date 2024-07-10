@@ -65,7 +65,7 @@ def blake3_hash(block_of_bytes, length, w):
     merge_bytes(block_of_bytes)
     for i in range(len(w)):
         w[i] = 0
-    hash_block(w, block_of_bytes, 0)
+    # hash_block(w, block_of_bytes, 0)
 
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
