@@ -28,22 +28,22 @@ def compare_hash(expected_hash, actual_hash):
     return 1
 
 
-@cuda.jit()
+@cuda.jit
 def crack_hash(entry_message_length, expected_hash, result):
-    combination = cuda.local.array(2, dtype=nb.types.uint32)
-    tid = cuda.threadIdx.x
-    bid = cuda.blockIdx.x
-    bdim = cuda.blockDim.x
-    gdim = cuda.gridDim.x
-    beginning = (bid * bdim) + tid
-    number_of_threads = bdim * gdim
-    number_of_elements = len(allowed_val)
-    for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
-        get_combination(entry_message_length, i, combination)
-        equal = compare_hash(expected_hash, blake3_hash(combination))
-        for j in range(entry_message_length):
-            if equal == 1:
-                cuda.atomic.add(result, j, combination[j])
+    combination = cuda.local.array(entry_message_length, dtype=nb.types.uint32)
+    # tid = cuda.threadIdx.x
+    # bid = cuda.blockIdx.x
+    # bdim = cuda.blockDim.x
+    # gdim = cuda.gridDim.x
+    # beginning = (bid * bdim) + tid
+    # number_of_threads = bdim * gdim
+    # number_of_elements = len(allowed_val)
+    # for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
+    #     get_combination(entry_message_length, i, combination)
+    #     equal = compare_hash(expected_hash, blake3_hash(combination))
+    #     for j in range(entry_message_length):
+    #         if equal == 1:
+    #             cuda.atomic.add(result, j, combination[j])
 
 
 def convert_cracked_hash_to_string(initial_combination):
@@ -67,17 +67,12 @@ cracking_presets = {
                  np.uint32(0x0D2C), np.uint32(0x835E), np.uint32(0x3398), np.uint32(0x5BE5)], dtype=np.uint32),
 }
 
-@cuda.jit
-def test(a, b, c):
-    c[0] = a[0] + b[0]
-
 
 length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
 start = time.perf_counter()
-#crack_hash[1, 1](length, cracking_presets[length], cuda_results)
-test[1,1](np.array([1], dtype=np.uint32), np.array([2], dtype=np.uint32), cuda_results)
+crack_hash[1, 1](length, cracking_presets[length], cuda_results)
 finish = time.perf_counter()
 results = cuda_results.copy_to_host()
 print(f"Elapsed time: {finish - start} s")
