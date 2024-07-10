@@ -29,9 +29,8 @@ def compare_hash(expected_hash, actual_hash):
 
 
 @cuda.jit
-def crack_hash(entry_message_length, expected_hash, result):
-    length = entry_message_length[0]
-    combination = cuda.local.array([length], dtype=np.uint32)
+def crack_hash(entry_message_length: nb.uint32, expected_hash, result):
+    combination = cuda.local.array([entry_message_length], dtype=np.uint32)
     tid = cuda.threadIdx.x
     bid = cuda.blockIdx.x
     bdim = cuda.blockDim.x
@@ -39,10 +38,10 @@ def crack_hash(entry_message_length, expected_hash, result):
     beginning = (bid * bdim) + tid
     number_of_threads = bdim * gdim
     number_of_elements = len(allowed_val)
-    for i in range(beginning, number_of_elements ** length, number_of_threads):
-        get_combination(length, i, combination)
+    for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
+        get_combination(entry_message_length, i, combination)
         equal = compare_hash(expected_hash, blake3_hash(combination))
-        for j in range(length):
+        for j in range(entry_message_length):
             if equal == 1:
                 cuda.atomic.add(result, j, combination[j])
 
