@@ -67,7 +67,7 @@ cracking_presets = {
                  np.uint32(0x0D2C), np.uint32(0x835E), np.uint32(0x3398), np.uint32(0x5BE5)], dtype=np.uint32),
 }
 
-length = np.uint32(2)
+length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
 start = time.perf_counter()
