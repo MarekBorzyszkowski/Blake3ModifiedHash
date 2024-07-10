@@ -15,9 +15,9 @@ BLOCKS_PER_GRID = 16
 
 @cuda.jit(device=True)
 def get_combination(entry_message_length, number):
-    indexes = []
+    indexes = np.arange([np.uint32(0) for _ in range(entry_message_length)], dtype=np.uint32)
     for i in range(entry_message_length):
-        indexes.append(np.uint32(number % len(allowed_val)))
+        indexes[i] = (np.uint32(number % len(allowed_val)))
         number = number // len(allowed_val)
     return np.array([np.uint32(allowed_val[index]) for index in indexes], dtype=np.uint32)
 
