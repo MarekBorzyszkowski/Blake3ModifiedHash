@@ -67,7 +67,7 @@ cracking_presets = {
                  np.uint32(0x0D2C), np.uint32(0x835E), np.uint32(0x3398), np.uint32(0x5BE5)], dtype=np.uint32),
 }
 
-@cuda.jit()
+@cuda.jit
 def test(a, b, c):
     c[0] = a[0] + b[0]
 
