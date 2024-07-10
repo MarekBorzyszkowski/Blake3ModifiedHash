@@ -1,7 +1,7 @@
 import numpy as np
 from numba import cuda
 
-from src.CUDA.Permutations_CUDA import G_function, permute_m_by_s
+from Permutations_CUDA import G_function, permute_m_by_s
 
 
 @cuda.jit(device=True)
