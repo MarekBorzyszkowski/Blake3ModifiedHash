@@ -6,8 +6,8 @@ from numba import cuda
 
 from HashFunc_CUDA import blake3_hash, allowed_val_to_letters, compare_hash, get_combination, allowed_val
 
-THREADS_PER_BLOCK = 256
-BLOCKS_PER_GRID = 1024
+THREADS_PER_BLOCK = 512
+BLOCKS_PER_GRID = 12288
 
 def crack_hash_wrapper(entry_message_length):
     @cuda.jit

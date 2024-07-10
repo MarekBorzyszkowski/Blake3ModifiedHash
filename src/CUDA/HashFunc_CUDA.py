@@ -77,7 +77,7 @@ allowed_val = np.array([np.uint32(ord(character)) for character in allowed_lette
 @cuda.jit(device=True)
 def get_combination(entry_message_length, number, combination):
     for i in range(entry_message_length):
-        combination[i] = (np.uint32(allowed_val[number % len(allowed_val)]))
+        combination[i] = allowed_val[number % len(allowed_val)]
         number = number // len(allowed_val)
     for i in range(entry_message_length, 32):
         combination[i] = 0
