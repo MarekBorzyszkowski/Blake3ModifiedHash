@@ -28,9 +28,10 @@ def compare_hash(expected_hash, actual_hash):
     return 1
 
 
-@cuda.jit(nb.void(nb.uint64, nb.uint32[:], nb.uint32[:]))
+@cuda.jit
 def crack_hash(entry_message_length, expected_hash, result):
-    combination = cuda.local.array([entry_message_length], dtype=np.uint32)
+    length = entry_message_length[0]
+    combination = cuda.local.array([length], dtype=np.uint32)
     tid = cuda.threadIdx.x
     bid = cuda.blockIdx.x
     bdim = cuda.blockDim.x
@@ -38,10 +39,10 @@ def crack_hash(entry_message_length, expected_hash, result):
     beginning = (bid * bdim) + tid
     number_of_threads = bdim * gdim
     number_of_elements = len(allowed_val)
-    for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
-        get_combination(entry_message_length, i, combination)
+    for i in range(beginning, number_of_elements ** length, number_of_threads):
+        get_combination(length, i, combination)
         equal = compare_hash(expected_hash, blake3_hash(combination))
-        for j in range(entry_message_length):
+        for j in range(length):
             if equal == 1:
                 cuda.atomic.add(result, j, combination[j])
 
@@ -70,8 +71,9 @@ cracking_presets = {
 length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
+cuda_length = cuda.to_device(np.array([length], dtype=np.uint32))
 start = time.perf_counter()
-crack_hash[1, 1](length, cracking_presets[length], cuda_results)
+crack_hash[1, 1](cuda_length, cracking_presets[length], cuda_results)
 finish = time.perf_counter()
 results = cuda_results.copy_to_host()
 print(f"Elapsed time: {finish - start} s")
