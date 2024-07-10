@@ -48,30 +48,15 @@ def merge_bytes(block_as_bytes):
 
 
 @cuda.jit(device=True)
-def fill_blocks(block):
-    number_of_elements = block.shape[0]
-    number_of_missing_elements = 32 - number_of_elements % 32
-    if number_of_missing_elements == 32:
-        block = np.append(block, np.array(
-            [np.uint32(0x007F), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF),
-             np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF), np.uint32(0x00FF)]))
-    else:
-        block = np.append(block, np.array(np.uint32(0x007F)))
-        number_of_missing_elements -= 1
-        if number_of_missing_elements > 0:
-            block = np.append(block, np.array([np.uint32(0x00FF) for _ in range(number_of_missing_elements)]))
-    return block
+def fill_blocks(block, length):
+    block[length] = np.uint32(0x007F)
+    for i in range(length+1, 32):
+        block[i] = np.uint32(0x00FF)
 
 
 @cuda.jit(device=True)
-def blake3_hash(block_of_bytes, w):
-    # block_of_bytes = fill_blocks(block_of_bytes)
+def blake3_hash(block_of_bytes, length, w):
+    fill_blocks(block_of_bytes, length)
     # block_of_words = merge_bytes(block_of_bytes)
     for i in range(len(w)):
         w[i] = 0
@@ -89,6 +74,8 @@ def get_combination(entry_message_length, number, combination):
     for i in range(entry_message_length):
         combination[i] = (np.uint32(allowed_val[number % len(allowed_val)]))
         number = number // len(allowed_val)
+    for i in range(entry_message_length, 32):
+        combination[i] = 0
 
 
 @cuda.jit(device=True)
