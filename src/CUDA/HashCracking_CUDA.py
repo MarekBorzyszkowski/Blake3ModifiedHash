@@ -14,12 +14,10 @@ THREADS_PER_BLOCK = 128
 BLOCKS_PER_GRID = 16
 
 @cuda.jit(device=True)
-def get_combination(entry_message_length, number):
-    indexes = np.arange([np.uint32(0) for _ in range(entry_message_length)], dtype=np.uint32)
+def get_combination(entry_message_length, number, combination):
     for i in range(entry_message_length):
-        indexes[i] = (np.uint32(number % len(allowed_val)))
+        combination[i] = (np.uint32(allowed_val[number % len(allowed_val)]))
         number = number // len(allowed_val)
-    return np.array([np.uint32(allowed_val[index]) for index in indexes], dtype=np.uint32)
 
 
 @cuda.jit(device=True)
@@ -32,6 +30,7 @@ def compare_hash(expected_hash, actual_hash):
 
 @cuda.jit(nb.void(nb.uint64, nb.uint32[:], nb.uint32[:]))
 def crack_hash(entry_message_length, expected_hash, result):
+    combination = cuda.local.array([entry_message_length], dtype=np.uint32)
     tid = cuda.threadIdx.x
     bid = cuda.blockIdx.x
     bdim = cuda.blockDim.x
@@ -40,7 +39,7 @@ def crack_hash(entry_message_length, expected_hash, result):
     number_of_threads = bdim * gdim
     number_of_elements = len(allowed_val)
     for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
-        combination = get_combination(entry_message_length, i)
+        get_combination(entry_message_length, i, combination)
         equal = compare_hash(expected_hash, blake3_hash(combination))
         for j in range(entry_message_length):
             if equal == 1:
