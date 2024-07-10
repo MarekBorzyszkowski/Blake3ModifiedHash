@@ -25,6 +25,9 @@ def G_function(a, b, c, d, x, y):
 
 @cuda.jit(device=True)
 def permute_m_by_s(m):
-    results = np.array([m[S_PERMUTATIONS[i]] for i in range(SHORT_SIZE)], dtype=np.uint32)
-    for i in range(SHORT_SIZE):
-        m[i] = results[i]
+    m5 = m[5]
+    i = 5
+    while i != 0:
+        m[i] = m[S_PERMUTATIONS[i]]
+        i = S_PERMUTATIONS[i]
+    m[0] = m5
