@@ -5,8 +5,6 @@ from numba import cuda
 
 from src.CUDA.Permutations_CUDA import rotl_test, G_function_test, permute_m_by_s_test
 
-THREADS_PER_BLOCK = 128
-BLOCKS_PER_GRID = 16
 
 
 class MyTestCase(unittest.TestCase):

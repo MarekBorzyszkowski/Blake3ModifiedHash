@@ -1,8 +1,6 @@
-import operator
-
-import numpy as np
 import numba as nb
-from numba import jit, cuda
+import numpy as np
+from numba import cuda
 
 SHORT_SIZE = 16
 S_PERMUTATIONS = np.array([5, 8, 0, 2, 6, 11, 1, 4, 15, 12, 3, 9, 10, 7, 13, 14])
