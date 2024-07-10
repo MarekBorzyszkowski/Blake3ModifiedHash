@@ -29,11 +29,7 @@ def make_round(v, m):
 
 
 @cuda.jit(device=True)
-def hash_block(w, m, block_number):
-    v = np.array([w[0], w[1], w[2], w[3],
-                  w[4], w[5], w[6], w[7],
-                  np.uint32(0x03F4), np.uint32(0x774C), np.uint32(0x5690), np.uint32(0xC878),
-                  np.uint32(0), np.uint32(block_number), np.uint32(0), np.uint32(0)])
+def hash_block(w, m, block_number, v):
     for i in range(6):
         make_round(v, m)
     w[0] = w[0] ^ v[0] ^ v[8]
@@ -60,12 +56,18 @@ def fill_blocks(block, length):
 
 
 @cuda.jit(device=True)
-def blake3_hash(block_of_bytes, length, w):
+def blake3_hash(block_of_bytes, length, v, w):
     fill_blocks(block_of_bytes, length)
     merge_bytes(block_of_bytes)
     for i in range(len(w)):
         w[i] = 0
-    # hash_block(w, block_of_bytes, 0)
+        v[i] = 0
+    v[8] = 0x03F4
+    v[9] = 0x774C
+    v[10] = 0x5690
+    v[11] = 0xC878
+    v[12] = v[13] = v[14] = v[15] = 0
+    hash_block(w, block_of_bytes, 0, v)
 
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'

@@ -14,6 +14,7 @@ def crack_hash_wrapper(entry_message_length):
     def crack_hash(expected_hash, result):
         combination = cuda.local.array(32, nb.types.uint32)
         w = cuda.local.array(8, nb.types.uint32)
+        v = cuda.local.array(16, nb.types.uint32)
         tid = cuda.threadIdx.x
         bid = cuda.blockIdx.x
         bdim = cuda.blockDim.x
@@ -23,7 +24,7 @@ def crack_hash_wrapper(entry_message_length):
         number_of_elements = len(allowed_val)
         for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
             get_combination(entry_message_length, i, combination)
-            blake3_hash(combination, entry_message_length, w)
+            blake3_hash(combination, entry_message_length, v, w)
             equal = compare_hash(expected_hash, w)
             for j in range(entry_message_length):
                 if equal == 1:
