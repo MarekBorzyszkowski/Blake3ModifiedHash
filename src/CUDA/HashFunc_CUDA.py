@@ -71,8 +71,8 @@ def fill_blocks(block):
 
 @cuda.jit(device=True)
 def blake3_hash(block_of_bytes):
-    block_of_bytes = fill_blocks(block_of_bytes)
-    block_of_words = merge_bytes(block_of_bytes)
+    # block_of_bytes = fill_blocks(block_of_bytes)
+    block_of_words = block_of_bytes#merge_bytes(block_of_bytes)
     w = np.array([np.uint32(0) for _ in range(8)])
     number_of_blocks = len(block_of_words) // 16
     for i in range(number_of_blocks):
