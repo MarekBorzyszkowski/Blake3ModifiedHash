@@ -13,7 +13,7 @@ allowed_val = np.array([np.uint32(ord(character)) for character in allowed_lette
 THREADS_PER_BLOCK = 128
 BLOCKS_PER_GRID = 16
 
-@cuda.jit(nb.uint32[:](nb.uint64, nb.uint64), device=True)
+@cuda.jit(device=True)
 def get_combination(entry_message_length, number):
     indexes = []
     for i in range(entry_message_length):
@@ -22,7 +22,7 @@ def get_combination(entry_message_length, number):
     return np.array([np.uint32(allowed_val[index]) for index in indexes], dtype=np.uint32)
 
 
-@cuda.jit(nb.uint32(nb.uint32[:], nb.uint32[:]), device=True)
+@cuda.jit(device=True)
 def compare_hash(expected_hash, actual_hash):
     for i in range(len(expected_hash)):
         if expected_hash[i] != actual_hash[i]:
