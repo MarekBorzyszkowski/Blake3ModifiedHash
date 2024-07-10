@@ -36,38 +36,42 @@ def hash_block(w, m, block_number):
                   np.uint32(0), np.uint32(block_number), np.uint32(0), np.uint32(0)])
     for i in range(6):
         make_round(v, m)
-    return np.array([w[0] ^ v[0] ^ v[8], w[1] ^ v[1] ^ v[9], w[2] ^ v[2] ^ v[10], w[3] ^ v[3] ^ v[11],
-                     w[4] ^ v[4] ^ v[12], w[5] ^ v[5] ^ v[13], w[6] ^ v[6] ^ v[14], w[7] ^ v[7] ^ v[15]],
-                    dtype=np.uint32)
+    w[0] = w[0] ^ v[0] ^ v[8]
+    w[1] = w[1] ^ v[1] ^ v[9]
+    w[2] = w[2] ^ v[2] ^ v[10]
+    w[3] = w[3] ^ v[3] ^ v[11]
+    w[4] = w[4] ^ v[4] ^ v[12]
+    w[5] = w[5] ^ v[5] ^ v[13]
+    w[6] = w[6] ^ v[6] ^ v[14]
+    w[7] = w[7] ^ v[7] ^ v[15]
 
 
 @cuda.jit(device=True)
 def merge_bytes(block_as_bytes):
-    return np.array([np.uint32((block_as_bytes[2 * i] << 8) + block_as_bytes[2 * i + 1])
-                     for i in range(len(block_as_bytes) // 2)])
+    for i in range(len(block_as_bytes) // 2):
+        block_as_bytes[i] = (block_as_bytes[2 * i] << 8) + block_as_bytes[2 * i + 1]
 
 
 @cuda.jit(device=True)
 def fill_blocks(block, length):
     block[length] = np.uint32(0x007F)
-    for i in range(length+1, 32):
+    for i in range(length + 1, 32):
         block[i] = np.uint32(0x00FF)
 
 
 @cuda.jit(device=True)
 def blake3_hash(block_of_bytes, length, w):
     fill_blocks(block_of_bytes, length)
-    # block_of_words = merge_bytes(block_of_bytes)
+    merge_bytes(block_of_bytes)
     for i in range(len(w)):
         w[i] = 0
-    # number_of_blocks = len(block_of_words) // 16
-    # for i in range(number_of_blocks):
-    #     hash_block(w, block_of_words[16 * i:16 * i + 16], i)
+    hash_block(w, block_of_bytes, 0)
 
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
 allowed_val_to_letters = {np.uint32(ord(character)): character for character in allowed_letters}
 allowed_val = np.array([np.uint32(ord(character)) for character in allowed_letters], dtype=np.uint32)
+
 
 @cuda.jit(device=True)
 def get_combination(entry_message_length, number, combination):
