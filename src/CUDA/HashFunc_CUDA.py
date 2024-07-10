@@ -78,3 +78,22 @@ def blake3_hash(block_of_bytes):
     for i in range(number_of_blocks):
         w = hash_block(w, block_of_words[16 * i:16 * i + 16], i)
     return w
+
+
+allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
+allowed_val_to_letters = {np.uint32(ord(character)): character for character in allowed_letters}
+allowed_val = np.array([np.uint32(ord(character)) for character in allowed_letters], dtype=np.uint32)
+
+@cuda.jit(device=True)
+def get_combination(entry_message_length, number, combination):
+    for i in range(entry_message_length):
+        combination[i] = (np.uint32(allowed_val[number % len(allowed_val)]))
+        number = number // len(allowed_val)
+
+
+@cuda.jit(device=True)
+def compare_hash(expected_hash, actual_hash):
+    for i in range(len(expected_hash)):
+        if expected_hash[i] != actual_hash[i]:
+            return 0
+    return 1

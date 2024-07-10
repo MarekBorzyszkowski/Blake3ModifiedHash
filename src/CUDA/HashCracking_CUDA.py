@@ -4,46 +4,28 @@ import numba as nb
 import numpy as np
 from numba import cuda
 
-from HashFunc_CUDA import blake3_hash
-
-allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
-allowed_val_to_letters = {np.uint32(ord(character)): character for character in allowed_letters}
-allowed_val = np.array([np.uint32(ord(character)) for character in allowed_letters], dtype=np.uint32)
+from HashFunc_CUDA import blake3_hash, allowed_val_to_letters
 
 THREADS_PER_BLOCK = 128
 BLOCKS_PER_GRID = 16
 
-@cuda.jit(device=True)
-def get_combination(entry_message_length, number, combination):
-    for i in range(entry_message_length):
-        combination[i] = (np.uint32(allowed_val[number % len(allowed_val)]))
-        number = number // len(allowed_val)
-
-
-@cuda.jit(device=True)
-def compare_hash(expected_hash, actual_hash):
-    for i in range(len(expected_hash)):
-        if expected_hash[i] != actual_hash[i]:
-            return 0
-    return 1
-
-
-@cuda.jit
-def crack_hash(entry_message_length, expected_hash, result):
-    combination = cuda.local.array(2, nb.types.uint32)
-    # tid = cuda.threadIdx.x
-    # bid = cuda.blockIdx.x
-    # bdim = cuda.blockDim.x
-    # gdim = cuda.gridDim.x
-    # beginning = (bid * bdim) + tid
-    # number_of_threads = bdim * gdim
-    # number_of_elements = len(allowed_val)
-    # for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
-    #     get_combination(entry_message_length, i, combination)
-    #     equal = compare_hash(expected_hash, blake3_hash(combination))
-    #     for j in range(entry_message_length):
-    #         if equal == 1:
-    #             cuda.atomic.add(result, j, combination[j])
+def crack_hash_wrapper(entry_message_length):
+    @cuda.jit
+    def crack_hash(expected_hash, result):
+        combination = cuda.local.array(entry_message_length, nb.types.uint32)
+        # tid = cuda.threadIdx.x
+        # bid = cuda.blockIdx.x
+        # bdim = cuda.blockDim.x
+        # gdim = cuda.gridDim.x
+        # beginning = (bid * bdim) + tid
+        # number_of_threads = bdim * gdim
+        # number_of_elements = len(allowed_letters)
+        # for i in range(beginning, number_of_elements ** entry_message_length, number_of_threads):
+        #     get_combination(entry_message_length, i, combination)
+        #     equal = compare_hash(expected_hash, blake3_hash(combination))
+        #     for j in range(entry_message_length):
+        #         if equal == 1:
+        #             cuda.atomic.add(result, j, combination[j])
 
 
 def convert_cracked_hash_to_string(initial_combination):
@@ -72,7 +54,7 @@ length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
 start = time.perf_counter()
-crack_hash[1, 1](length, cracking_presets[length], cuda_results)
+crack_hash_wrapper(length)[1, 1](cracking_presets[length], cuda_results)
 finish = time.perf_counter()
 results = cuda_results.copy_to_host()
 print(f"Elapsed time: {finish - start} s")
