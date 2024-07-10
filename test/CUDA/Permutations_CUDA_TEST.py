@@ -19,9 +19,7 @@ def G_function_test(array):
 
 @cuda.jit(nb.void(nb.uint32[:]))
 def permute_m_by_s_test(m):
-    results = permute_m_by_s(m)
-    for i in range(len(m)):
-        m[i] = results[i]
+    permute_m_by_s(m)
 
 
 class MyTestCase(unittest.TestCase):

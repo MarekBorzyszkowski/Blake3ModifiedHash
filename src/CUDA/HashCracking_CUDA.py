@@ -6,8 +6,8 @@ from numba import cuda
 
 from HashFunc_CUDA import blake3_hash, allowed_val_to_letters, compare_hash, get_combination, allowed_val
 
-THREADS_PER_BLOCK = 128
-BLOCKS_PER_GRID = 16
+THREADS_PER_BLOCK = 256
+BLOCKS_PER_GRID = 1024
 
 def crack_hash_wrapper(entry_message_length):
     @cuda.jit
@@ -26,8 +26,9 @@ def crack_hash_wrapper(entry_message_length):
             get_combination(entry_message_length, i, combination)
             blake3_hash(combination, entry_message_length, v, w)
             equal = compare_hash(expected_hash, w)
-            for j in range(entry_message_length):
-                if equal == 1:
+            if equal == 1:
+                get_combination(entry_message_length, i, combination)
+                for j in range(entry_message_length):
                     cuda.atomic.add(result, j, combination[j])
 
     return crack_hash
@@ -58,7 +59,7 @@ length = 2
 print(f"Start cracking for length {length}")
 cuda_results = cuda.to_device(np.array([0 for _ in range(length)], dtype=np.uint32))
 start = time.perf_counter()
-crack_hash_wrapper(length)[1, 1](cracking_presets[length], cuda_results)
+crack_hash_wrapper(length)[BLOCKS_PER_GRID, THREADS_PER_BLOCK](cracking_presets[length], cuda_results)
 finish = time.perf_counter()
 results = cuda_results.copy_to_host()
 print(f"Elapsed time: {finish - start} s")

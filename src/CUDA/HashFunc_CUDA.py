@@ -1,24 +1,23 @@
-import numba as nb
 import numpy as np
 from numba import cuda
 
-from Permutations_CUDA import G_function, permute_m_by_s
+from src.CUDA.Permutations_CUDA import G_function, permute_m_by_s
 
 
 @cuda.jit(device=True)
 def vertical_permutation(v, m):
-    G_function(v[0], v[4], v[8], v[12], m[0], m[1])
-    G_function(v[1], v[5], v[9], v[13], m[2], m[3])
-    G_function(v[2], v[6], v[10], v[14], m[4], m[5])
-    G_function(v[3], v[7], v[11], v[15], m[6], m[7])
+    v[0], v[4], v[8], v[12] = G_function(v[0], v[4], v[8], v[12], m[0], m[1])
+    v[1], v[5], v[9], v[13] = G_function(v[1], v[5], v[9], v[13], m[2], m[3])
+    v[2], v[6], v[10], v[14] = G_function(v[2], v[6], v[10], v[14], m[4], m[5])
+    v[3], v[7], v[11], v[15] = G_function(v[3], v[7], v[11], v[15], m[6], m[7])
 
 
 @cuda.jit(device=True)
 def diagonal_permutation(v, m):
-    G_function(v[0], v[5], v[10], v[15], m[8], m[9])
-    G_function(v[1], v[6], v[11], v[12], m[10], m[11])
-    G_function(v[2], v[7], v[8], v[13], m[12], m[13])
-    G_function(v[3], v[4], v[9], v[14], m[14], m[15])
+    v[0], v[5], v[10], v[15] = G_function(v[0], v[5], v[10], v[15], m[8], m[9])
+    v[1], v[6], v[11], v[12] = G_function(v[1], v[6], v[11], v[12], m[10], m[11])
+    v[2], v[7], v[8], v[13] = G_function(v[2], v[7], v[8], v[13], m[12], m[13])
+    v[3], v[4], v[9], v[14] = G_function(v[3], v[4], v[9], v[14], m[14], m[15])
 
 
 @cuda.jit(device=True)
@@ -29,7 +28,7 @@ def make_round(v, m):
 
 
 @cuda.jit(device=True)
-def hash_block(w, m, block_number, v):
+def hash_block(w, m, v):
     for i in range(6):
         make_round(v, m)
     w[0] = w[0] ^ v[0] ^ v[8]
@@ -49,15 +48,15 @@ def merge_bytes(block_as_bytes):
 
 
 @cuda.jit(device=True)
-def fill_blocks(block, length):
-    block[length] = np.uint32(0x007F)
-    for i in range(length + 1, 32):
+def fill_blocks(block, elements_length):
+    block[elements_length] = np.uint32(0x007F)
+    for i in range(elements_length + 1, 32):
         block[i] = np.uint32(0x00FF)
 
 
 @cuda.jit(device=True)
-def blake3_hash(block_of_bytes, length, v, w):
-    fill_blocks(block_of_bytes, length)
+def blake3_hash(block_of_bytes, elements_length, v, w):
+    fill_blocks(block_of_bytes, elements_length)
     merge_bytes(block_of_bytes)
     for i in range(len(w)):
         w[i] = 0
@@ -67,7 +66,7 @@ def blake3_hash(block_of_bytes, length, v, w):
     v[10] = 0x5690
     v[11] = 0xC878
     v[12] = v[13] = v[14] = v[15] = 0
-    hash_block(w, block_of_bytes, 0, v)
+    hash_block(w, block_of_bytes,  v)
 
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'

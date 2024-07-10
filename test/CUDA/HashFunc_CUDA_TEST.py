@@ -9,30 +9,22 @@ from src.CUDA.HashFunc_CUDA import vertical_permutation, diagonal_permutation, h
 
 @cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
 def vertical_permutation_test(v, m):
-    results = vertical_permutation(v, m)
-    for i in range(len(v)):
-        v[i] = results[i]
+    vertical_permutation(v, m)
 
 
 @cuda.jit(nb.void(nb.uint32[:], nb.uint32[:]))
 def diagonal_permutation_test(v, m):
-    results = diagonal_permutation(v, m)
-    for i in range(len(v)):
-        v[i] = results[i]
+    diagonal_permutation(v, m)
 
 
-@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:], nb.uint32))
+@cuda.jit(nb.void(nb.uint32[:], nb.uint32[:], nb.uint32[:]))
 def hash_block_test(w, m, block_number):
-    results = hash_block(w, m, block_number)
-    for i in range(len(w)):
-        w[i] = results[i]
+    hash_block(w, m, block_number)
 
 
 @cuda.jit(nb.void(nb.uint32[:]))
-def blake3_hash_test(block_of_bytes, w):
-    results = blake3_hash(block_of_bytes)
-    for i in range(len(w)):
-        w[i] = results[i]
+def blake3_hash_test(block_of_bytes, length, v, w):
+    blake3_hash(block_of_bytes, length, v, w)
 
 
 def message_to_binary(message):
@@ -77,11 +69,17 @@ class MyTestCase(unittest.TestCase):
     def test_hash_block(self):
         m = np.array([np.uint32(((2 * i) << 8) + (2 * i + 1)) for i in range(16)])
         init_w = np.array([np.uint32(0) for _ in range(8)])
+        v = np.array([np.uint32(0) for _ in range(16)])
+        v[8] = 0x03F4
+        v[9] = 0x774C
+        v[10] = 0x5690
+        v[11] = 0xC878
         expected = np.array([np.uint32(0xF089), np.uint32(0x4377), np.uint32(0x32AC), np.uint32(0x4197),
                              np.uint32(0x63C3), np.uint32(0x975A), np.uint32(0x15CD), np.uint32(0xDD5B)])
         cuda_m = cuda.to_device(m)
         cuda_w = cuda.to_device(init_w)
-        hash_block_test[1, 1](cuda_w, cuda_m, 0)
+        cuda_v = cuda.to_device(v)
+        hash_block_test[1, 1](cuda_w, cuda_m, cuda_v)
         result = cuda_w.copy_to_host()
         for i in range(len(result)):
             self.assertEqual(expected[i], result[i])  # add assertion here
@@ -93,7 +91,13 @@ class MyTestCase(unittest.TestCase):
         binary = message_to_binary(message)
         cuda_message = cuda.to_device(binary)
         cuda_w = cuda.device_array([8], np.uint32)
-        blake3_hash_test[1, 1](cuda_message, cuda_w)
+        v = np.array([np.uint32(0) for _ in range(16)])
+        v[8] = 0x03F4
+        v[9] = 0x774C
+        v[10] = 0x5690
+        v[11] = 0xC878
+        cuda_v = cuda.to_device(v)
+        blake3_hash_test[1, 1](cuda_message, len(message),  cuda_w)
         result = cuda_w.copy_to_host()
         for i in range(len(expected)):
             self.assertEqual(expected[i], result[i])
