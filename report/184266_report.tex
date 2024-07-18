@@ -31,7 +31,7 @@
 \tableofcontents
 \newpage
 \section{Wstęp}
-Cele projektu było zaimplementowanie funckji na bazie \texttt{Blake3}, 
+Celami projektu było zaimplementowanie funckji na bazie \texttt{Blake3}, 
 wykorzystanie tej funkcji do stworzenia programu hashującego zadane ciągi znaków ze standardowego wejścia oraz dokonanie ataku kryptograficznego.
 \section{Opis projektu}
 Projekt wraz z instrukcją i wynikami znajdują się w repozytorium: \
@@ -50,11 +50,11 @@ Do łatwego zainstalowania wymaganych pakietów stworzono plik \texttt{requireme
 
 W celu ułatwienia tworzenia działającego i łatwego w używaniu kodu stworzono szereg testów jednostkowych i end to end. 
 
-Do włączenia programu pozwalającego na korzystanie z funckcji hashującej w formie interaktywnej istnieje skrypt \texttt{startHashing.sh}. W przypadku utworzenia 
+Do włączenia programu pozwalającego na korzystanie z funkcji hashującej w formie interaktywnej istnieje skrypt \texttt{startHashing.sh}. W przypadku utworzenia 
 wirtualnego środowiska w innym miejscu niż wyspecyfikowanym w \texttt{startHashing.sh}, należy dokonać odpowiednich zmian w pliku.
 Po włączeniu programu, hashuje on ciągi znaków ze standardowego wejścia, do momentu użycia znaku \texttt{EoF}, co wyłącza program.
 Przykładowe użycie programu Lst.~\ref{lst:cli_output}.
-\begin{lstlisting}[caption={Przykładowy przebieg działanaia programu}, label={lst:cli_output}]
+\begin{lstlisting}[caption={Przykładowy przebieg działania programu}, label={lst:cli_output}]
 	To end the program insert EOF (Ctrl + D on unix, Ctrl + Z on windows)
 
 	Blake3 hash of '' = 898F E038 CC44 AC95 0F78 F84D 8796 98C9 
@@ -67,7 +67,7 @@ Przykładowe użycie programu Lst.~\ref{lst:cli_output}.
 
 Powyższy program korzysta z implementacji na CPU. Z kodu napisanego pod CUDA można korzystać na komputerze bez CUDA dodając flagę \texttt{NUMBA\_ENABLE\_CUDASIM=1}. 
 
-Podczas ataku kryptograficznego korzystano z jednego komputera o specyfikcaji:
+Podczas ataku kryptograficznego korzystano z jednego komputera o specyfikacji:
 \begin{itemize}
 	\item CPU: intel i7-13700K,
 	\item GPU: RTX 4070Ti,
@@ -78,8 +78,8 @@ Podczas ataku za pomocą CPU korzystano z 24 wątków, a podczas ataku za pomoc�
 
 \section{Wyniki}
 Wyniki ataków kryptograficznych dla kolejnych długości ciągów znaków i ich hashów znajdują się w tabeli Tab.~\ref{tab:results}. 
-Dla każdej długości i znanej dla niej wynikowego hasha zapisany jest wejściowy ciąg znaków oraz czas jego znalezienia korzystając z ataku kryptograficznego pisanego pod CPU i CUDA.
-Dla ciągów 7 i 8 w wartości CPU znajduje się \texttt{-}, gdyż według szacunków ciąg 7 znakowy liczyłby się 48 dni, a 8 znakowy 12 lat, oba czasy są zbyt długie jak na potrzeby ataku.
+Dla każdej długości i znanego dla niej wynikowego hasha zapisany jest wejściowy ciąg znaków oraz czas jego znalezienia korzystając z ataku kryptograficznego pisanego pod CPU i CUDA.
+Dla ciągów 7 i 8 w wartości CPU znajduje się \texttt{-}, gdyż według szacunków ciąg o długości 7 znaków liczyłby się 48 dni, a długości 8 znaków 12 lat, oba czasy są zbyt długie jak na potrzeby ataku.
 \begin{table}[H]
 	\caption{Wyniki ataków kryptograficznych}
 	\centering
