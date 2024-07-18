@@ -2,7 +2,7 @@ import numba as nb
 import numpy as np
 from numba import jit
 
-from src.CPU.Permutations import G_function, permute_m_by_s
+from CPU.Permutations import G_function, permute_m_by_s
 
 allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
 allowed_val_to_letters = {np.uint16(ord(character)): character for character in allowed_letters}

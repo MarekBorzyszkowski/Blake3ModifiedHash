@@ -4,7 +4,7 @@ import numba as nb
 import numpy as np
 from numba import jit, prange
 
-from src.CPU.HashFunc import blake3_hash, allowed_val, allowed_val_to_letters
+from HashFunc import blake3_hash, allowed_val, allowed_val_to_letters
 
 
 @jit(nb.uint16[:](nb.uint64, nb.uint64), nopython=True)
