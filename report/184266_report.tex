@@ -7,12 +7,22 @@
 	\usepackage{geometry}
 	\usepackage{listings}
 	\usepackage{float}
+	\usepackage{hyperref}
  \usepackage{graphicx}
-
+ \usepackage{lmodern}  % for bold teletype font
+ \usepackage{amsmath}  % for \hookrightarrow
+ \usepackage{xcolor}   % for \textcolor
+ \lstset{
+	basicstyle=\ttfamily,
+	columns=fullflexible,
+	frame=single,
+	breaklines=true,
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+  }
 
 	%\usepackage[hidelinks]{hyperref}
 
-\title{Implementacja funkcji blake3 i atak kryptograficzny}
+\title{Implementacja funkcji Blake3 i atak kryptograficzny}
 \author{inż. Marek Borzyszkowski 184266}
 \date{\today}
 \begin{document}
@@ -20,6 +30,79 @@
 \maketitle
 \tableofcontents
 \newpage
+\section{Wstęp}
+Cele projektu było zaimplementowanie funckji na bazie \texttt{Blake3}, 
+wykorzystanie tej funkcji do stworzenia programu hashującego zadane ciągi znaków ze standardowego wejścia oraz dokonanie ataku kryptograficznego.
+\section{Opis projektu}
+Projekt wraz z instrukcją i wynikami znajdują się w repozytorium: \
 
+\href{https://github.com/MarekBorzyszkowski/Blake3ModifiedHash}{\texttt{https://github.com/MarekBorzyszkowski/Blake3ModifiedHash}}
+
+Znajdują się tam 2 implementacje, pod CPU i CUDA. Wersja CUDA została zoptymalizowana do ataku kryptograficznego na ciąg składający się do 8 znaków.
+Język programowania wykorzystany w projekcie to \texttt{Python} w wersji \texttt{3.12}, a wykorzystane pakiety do optymalizacji kodu to:
+\begin{itemize}
+	\item numpy w wersji 2.0.0,
+	\item numba w wersji 0.60.0.
+\end{itemize}
+Do łatwego zainstalowania wymaganych pakietów stworzono plik \texttt{requirements.txt}, który można wykorzystać w komendzie:
+
+\texttt{pip install -r requirements.txt}
+
+W celu ułatwienia tworzenia działającego i łatwego w używaniu kodu stworzono szereg testów jednostkowych i end to end. 
+
+Do włączenia programu pozwalającego na korzystanie z funckcji hashującej w formie interaktywnej istnieje skrypt \texttt{startHashing.sh}. W przypadku utworzenia 
+wirtualnego środowiska w innym miejscu niż wyspecyfikowanym w \texttt{startHashing.sh}, należy dokonać odpowiednich zmian w pliku.
+Po włączeniu programu, hashuje on ciągi znaków ze standardowego wejścia, do momentu użycia znaku \texttt{EoF}, co wyłącza program.
+Przykładowe użycie programu Lst.~\ref{lst:cli_output}.
+\begin{lstlisting}[caption={Przykładowy przebieg działanaia programu}, label={lst:cli_output}]
+	To end the program insert EOF (Ctrl + D on unix, Ctrl + Z on windows)
+
+	Blake3 hash of '' = 898F E038 CC44 AC95 0F78 F84D 8796 98C9 
+	abc
+	Blake3 hash of 'abc' = 9E0F 5F51 00C1 44A0 9F84 CB56 D23C 9770 
+	AbCxYz
+	Blake3 hash of 'AbCxYz' = E1C1 3F52 3C78 7589 22FD 11AA 3132 D01C 
+	Thank you for using Blake3 hash!	
+\end{lstlisting}
+
+Powyższy program korzysta z implementacji na CPU. Z kodu napisanego pod CUDA można korzystać na komputerze bez CUDA dodając flagę \texttt{NUMBA\_ENABLE\_CUDASIM=1}. 
+
+Podczas ataku kryptograficznego korzystano z jednego komputera o specyfikcaji:
+\begin{itemize}
+	\item CPU: intel i7-13700K,
+	\item GPU: RTX 4070Ti,
+	\item RAM: 32GB DDR5 5600MHz,
+	\item Dysk: M.2 PCI-e 4.0.
+\end{itemize}
+Podczas ataku za pomocą CPU korzystano z 24 wątków, a podczas ataku za pomocą CUDA z 12288 bloków po 512 wątków.
+
+\section{Wyniki}
+Wyniki ataków kryptograficznych dla kolejnych długości ciągów znaków i ich hashów znajdują się w tabeli Tab.~\ref{tab:results}. 
+Dla każdej długości i znanej dla niej wynikowego hasha zapisany jest wejściowy ciąg znaków oraz czas jego znalezienia korzystając z ataku kryptograficznego pisanego pod CPU i CUDA.
+Dla ciągów 7 i 8 w wartości CPU znajduje się \texttt{-}, gdyż według szacunków ciąg 7 znakowy liczyłby się 48 dni, a 8 znakowy 12 lat, oba czasy są zbyt długie jak na potrzeby ataku.
+\begin{table}[H]
+	\caption{Wyniki ataków kryptograficznych}
+	\centering
+	\label{tab:results}
+	\begin{tabular}{|p{1.5cm}|p{4.5cm}|p{2cm}|p{2cm}|p{2cm}|}
+		\hline
+		Dł. ciągu	& Wynikowy hash												& Wejściowy ciąg znaków	& CPU			& CUDA			\\
+		\hline
+		2			& \texttt{29 0D 8E 30 A7 F7 58 DE 02 3C 9C 74 62 33 63 1D}	& \texttt{2\#} 			& 0,00213 s 	& 0,45342 s		\\
+		\hline
+		3			& \texttt{6C 34 6E 8D 30 67 EF 3B 7B C3 E5 C2 99 CC 75 35}	& \texttt{aLV} 			& 0,05210 s 	& 0,44876 s		\\
+		\hline
+		4			& \texttt{E1 4D A6 D5 EB 17 15 BE CD 5D 46 80 D9 9D 6E DC}	& \texttt{\_)lU} 		& 4,86261 s 	& 0,48625 s		\\
+		\hline
+		5			& \texttt{26 8D DE E3 CD 85 4D 73 80 E5 4F 61 57 12 86 CD}	& \texttt{4H/\&\#} 		& 7,49707 min 	& 1,10177 s		\\
+		\hline
+		6			& \texttt{CF AC 55 48 46 A0 7C F5 54 34 4C 38 7B 8E 48 DC}	& \texttt{q?u5G(} 		& 12,5012 h		& 1,02363 min	\\
+		\hline
+		7			& \texttt{22 AA 75 76 75 8A 39 78 77 BC 3A A0 40 F5 BD 12}	& \texttt{dBD4@N\&} 	& \texttt{-} 	& 1,60530 h		\\
+		\hline
+		8			& \texttt{62 07 25 80 37 4C 71 E6 0D 2C 83 5E 33 98 5B E5}	& \texttt{njpn7y83} 	& \texttt{-} 	& 6,30219 dni	\\
+		\hline
+	\end{tabular}
+\end{table}
 
 \end{document}
