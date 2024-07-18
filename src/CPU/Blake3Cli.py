@@ -1,6 +1,6 @@
 import sys
 
-from CPU.HashFunc import blake3_hash, message_to_binary
+from HashFunc import blake3_hash, message_to_binary
 
 
 print("To end the program insert EOF (Ctrl + D on unix, Ctrl + Z on windows)")
