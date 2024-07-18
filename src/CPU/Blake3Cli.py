@@ -3,7 +3,7 @@ import sys
 from HashFunc import blake3_hash, message_to_binary
 
 
-print("To end the program insert EOF (Ctrl + D on unix, Ctrl + Z on windows)")
+print("To end the program insert EoF (Ctrl + D on unix, Ctrl + Z on windows)")
 while True:
     a = sys.stdin.readline()
     if len(a) == 0:
