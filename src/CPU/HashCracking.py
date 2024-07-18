@@ -4,11 +4,7 @@ import numba as nb
 import numpy as np
 from numba import jit, prange
 
-from HashFunc import blake3_hash
-
-allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
-allowed_val_to_letters = {np.uint16(ord(character)): character for character in allowed_letters}
-allowed_val = np.array([np.uint16(ord(character)) for character in allowed_letters], dtype=np.uint16)
+from src.CPU.HashFunc import blake3_hash, allowed_val, allowed_val_to_letters
 
 
 @jit(nb.uint16[:](nb.uint64, nb.uint64), nopython=True)

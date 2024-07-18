@@ -2,7 +2,11 @@ import numba as nb
 import numpy as np
 from numba import jit
 
-from Permutations import G_function, permute_m_by_s
+from src.CPU.Permutations import G_function, permute_m_by_s
+
+allowed_letters = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*-_=+([{<)]}>\'";:?,.\\/|'
+allowed_val_to_letters = {np.uint16(ord(character)): character for character in allowed_letters}
+allowed_val = np.array([np.uint16(ord(character)) for character in allowed_letters], dtype=np.uint16)
 
 
 @jit(nb.uint16[:](nb.uint16[:], nb.uint16[:]), nopython=True)
@@ -47,7 +51,7 @@ def hash_block(w, m, block_number):
 @jit(nb.uint16[:](nb.uint16[:]), nopython=True)
 def merge_bytes(block_as_bytes):
     return np.array([np.uint16((block_as_bytes[2 * i] << 8) + block_as_bytes[2 * i + 1])
-                     for i in range(len(block_as_bytes)//2)])
+                     for i in range(len(block_as_bytes) // 2)])
 
 
 @jit(nb.uint16[:](nb.uint16[:]), nopython=True)
@@ -77,9 +81,9 @@ def blake3_hash(block_of_bytes):
     block_of_bytes = fill_blocks(block_of_bytes)
     block_of_words = merge_bytes(block_of_bytes)
     w = np.array([np.uint16(0) for _ in range(8)])
-    number_of_blocks = len(block_of_words)//16
+    number_of_blocks = len(block_of_words) // 16
     for i in range(number_of_blocks):
-        w = hash_block(w, block_of_words[16*i:16*i+16], i)
+        w = hash_block(w, block_of_words[16 * i:16 * i + 16], i)
     return w
 
 
